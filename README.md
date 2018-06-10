@@ -4,7 +4,7 @@
 # current info
 - currently, its more basic than any robot should be
 - one of five personalities will be generated for the bot, if an existing id isnt supplied
-- its personality will determine how it greets you, what it asks and its catchphrase that will occasionally pop up in conversation
+- its personality will determine how it greets you, what it asks and its quirk and catchphrase that will occasionally pop up in conversation
 - brain.py is where the bot class is
 - learnerBot.py is an example of the code
 - knowledge.db is a database where the bots' personalities and shared knowledge is stored
@@ -19,3 +19,4 @@
 - add emotions that will affect speech
 - an actual conversational interface
 - the ability to teach the bot new words, phrases, grammar
+- changing names, quirks and catchphrases bc currently all are the same for new bots, except example bot 1
