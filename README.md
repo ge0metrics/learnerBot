@@ -5,6 +5,9 @@
 - currently, its more basic than any robot should be
 - one of five personalities will be generated for the bot, if an existing id isnt supplied
 - its personality will determine how it greets you, what it asks and its catchphrase that will occasionally pop up in conversation
+- brain.py is where the bot class is
+- learnerBot.py is an example of the code
+- knowledge.db is a database where the bots' personalities and shared knowledge is stored
 
 # current methods
 - myBot=Bot() or myBot=Bot(id=4) | initialize the bot
