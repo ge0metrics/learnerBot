@@ -3,45 +3,110 @@ import random,sqlite3,uuid,string
 class Bot:
 	"create a bot object"
 	def __init__(self,botid=0):
-		if botid==0:
-			c.execute("SELECT index,word,category,type FROM knowledge WHERE category='personality'")
-			personalities=c.fetchall()
-			ps=random.choice(personalities)
-			self.personality=ps[1]
-			self.pid=ps[0]
-			self.formality=ps[3]
-			self.name="bot"
-			self.catchphrase="what's new?"
-			self.quirk="chirp"
-			tempkey=str(uuid.uuid4())
-			print("i'm a new bot! want to save me to the database? y/n")
-			ans=input()
-			if ans.lower=="y":
-				c.execute("INSERT INTO bot_info (name,personality,catchphrase,quirk,temp_key) VALUES (?,?,?,?,?)",(self.name,self.personality,self.catchphrase,self.quirk,tempkey))
-				con.commit()
-				c.execute("SELECT id,mood FROM bot_info WHERE temp_key=(?)",(tempkey,))
-				self.botid=c.fetchall()[0][0]
-				self.mood=c.fetchall()[0][1]
+		if botid==0: # if no bot id supplied, we generate a new bot
+
+			### LIKES/DISLIKES ###
+			c.execute("SELECT word FROM knowledge WHERE category='noun' AND type='object'") # fetch objects
+			objects=c.fetchall()
+			c.execute("SELECT word FROM knowledge WHERE category='verb' AND tense='pres cont'") # fetch verbs
+			verbs=c.fetchall()
+			self.likes=[]
+			self.likes.append(random.choice(objects)[0]) # random object like
+			self.likes.append(random.choice(verbs[0])) # random verb like
+			self.dislikes.append(random.choice(objects[0])) # random object dislike
+			self.dislikes.append(random.choice(verbs[0])) # random verb dislike
+
+			### PERSONALITY ###
+			c.execute("SELECT word,type,id FROM knowledge WHERE category='personality'") # get personalities from knowledge
+			personalities=c.fetchall() # store in personalities variable
+			ps=random.choice(personalities) # select random personality
+			self.personality=ps[0] # this holds the name of the personality
+			self.formality=ps[1] # holds the formality associated with the personality (FORMAL, RELAXED, RANDOM)
+			self.pid=ps[2] # need personality id if saving the bot
+
+			### MOOD ###
+			c.execute("SELECT word,type,id FROM knowledge WHERE category='mood'") # get moods from knowledge
+			moods=c.fetchall() # store in moods variable
+			mo=random.choice(moods) # select random mood for now
+			self.mood=mo[0] # this holds the name of the mood
+			self.attitude=mo[1] # this holds how the mood affects their attitude (positive or negative)
+			self.mid=mo[2] # need mood id if saving the bot
+
+			### NAME ###
+			c.execute("SELECT word,type,id FROM knowledge WHERE category='name'") # get names from knowledge
+			names=c.fetchall() # store in names variable
+			na=random.choice(names) # choose random name
+			self.name=na[0] # store name
+			self.style=na[1] # store MASC/FEM/NEU (gives the bot more personality)
+			self.nid=na[2] # need name id if saving the bot
+
+			### CATCHPHRASE ###
+			c.execute("SELECT word,id FROM knowledge WHERE type='catchphrase' AND category=(?)",(self.personality,)) # get catchphrases from knowledge
+			catchphrases=c.fetchall() # store in catchphrases variable
+			ca=random.choice(catchphrases) # choose random catchphrase
+			self.catchphrase=ca[0] # store catchphrase
+			self.cid=ca[1] # need catchphrase id if saving the bot
+
+			### QUIRK ###
+			c.execute("SELECT word,id FROM knowledge WHERE type='quirk' AND category=(?)",(self.personality,)) # get quirks from knowledge
+			quirks=c.fetchall() # store in quirks variable
+			qu=random.choice(quirks) # choose random quirk
+			self.quirk=qu[0] # store quirk
+			self.qid=qu[1] # need quirk id if saving the bot
+
+			### SAVE THE BOT? ###
+			print("i'm a new bot! want to save me to the database? y/n") # ask user if they want to save the bot
+			ans=input() # wait for input y/n
+			if ans.lower=="y": # lowercase it if user puts Y
+				tempkey=str(uuid.uuid4()) # use to grab botid once saved and give it to the user
+				c.execute("INSERT INTO bot_info (name,personality,catchphrase,quirk,temp_key,mood,likes,dislikes) VALUES (?,?,?,?,?,?,?,?)",(self.nid,self.pid,self.cid,self.qid,tempkey,self.likes,self.dislikes))
+				con.commit() # commit bot to database
+				c.execute("SELECT id FROM bot_info WHERE temp_key=(?)",(tempkey,)) # get botid using tempkey
+				self.botid=c.fetchall()[0][0] # store botid
+				c.execute("UPDATE knowledge SET temp_key=('') WHERE id=(?)",(self.botid,)) # set temp_key to nothing to save space
+				con.commit() # commit the update
 				print("ok! my id is {}, so use this to create me next time!".format(self.botid))
 			else:
 				print("ok, when this program ends, my personality will be gone.")
-		else:
-			c.execute("SELECT * FROM bot_info WHERE id=(?)",(botid,))
-			info=c.fetchall()[0]
-			self.name=info[1]
-			self.pid=info[2]
-			self.catchphrase=info[3]
-			self.quirk=info[4]
-			self.likes=info[6]
-			self.dislikes=info[7]
-			self.mood=info[8]
-			self.botid=botid
+		else: # botid has been specified
+			c.execute("SELECT name,personality,catchphrase,quirk,likes,dislikes,mood FROM bot_info WHERE id=(?)",(botid,)) # get bot from database
+			info=c.fetchall()[0] # fetch first result because there should only be one anyway
+			self.nid=info[0] # name id
+			self.pid=info[1] # personality id
+			self.cid=info[2] # catchphrase id
+			self.qid=info[3] # quirk id
+			self.likes=info[4] # likes
+			self.dislikes=info[5] # dislikes
+			self.mid=info[6] #  mood id
+			self.botid=botid # botid
 
-			c.execute("SELECT word,type FROM knowledge WHERE id=(?)",(self.pid,))
-			p=c.fetchall()[0]
-			self.personality=p[0]
-			self.formality=p[1]
+			### NAME ###
+			c.execute("SELECT word,type FROM knowledge WHERE id=(?)",(self.nid,)) # get name info
+			na=c.fetchall()[0]
+			self.name=na[0] # name as word
+			self.style=na[1] # style (MASC,FEM,NEU)
 
+			### PERSONALITY ###
+			c.execute("SELECT word,type FROM knowledge WHERE id=(?)",(self.pid,)) # get personality info
+			pe=c.fetchall()[0]
+			self.personality=pe[0] # personality as word
+			self.formality=pe[1] # formality (FORMAL,RELAXED,RANDOM)
+
+			### CATCHPHRASE ###
+			c.execute("SELECT word FROM knowledge WHERE id=(?)",(self.cid,)) # get catchphrase info
+			ca=c.fetchall()[0]
+			self.catchphrase=ca[0] # catchphrase as word(s)
+
+			### QUIRK ###
+			c.execute("SELECT word FROM knowledge WHERE id=(?)",(self.qid,)) # get quirk info
+			qu=c.fetchall()[0]
+			self.quirk=qu[0] # quirk as word(s)
+
+			### MOOD ###
+			c.execute("SELECT word,type FROM knowledge WHERE id=(?)",(self.mid,)) # get mood info
+			mo=c.fetchall()[0]
+			self.mood=mo[0] # mood as word
+			self.attitude=mo[1] # attitude (POSITIVE or NEGATIVE)
 
 	def greet(self,mode=0):
 		if mode==0:
