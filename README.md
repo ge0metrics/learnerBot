@@ -12,6 +12,7 @@
 # current methods
 - `myBot=Bot()` initialize the bot
   - `id=4` initialize a bot with an id
+  - `debug=True` initializes bot in debug mode
 - `myBot.speak()` get the bot to say something
   - `length="short"` or `length="medium"` random length if not supplied
 - `myBot.ask()` get the bot to ask something
