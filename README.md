@@ -29,8 +29,10 @@
 - myBot.ask() | get the bot to ask something
 - myBot.greet() | get the bot to greet you
   - mode="respond" for answer to "what's up" style questions
+- myBot.reply() | analyses user messages to try and give a related reply
 
 # future updates
+- replies need to be coded more dynamically instead of checking every possible type of word separately
 - emotions affecting speech
 - the ability to teach the bot new words, phrases, grammar
 - changing names, quirks and catchphrases bc currently all are the same for new bots, except example bot 1
