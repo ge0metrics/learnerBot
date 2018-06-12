@@ -1,15 +1,15 @@
-import random,sqlite3,uuid
+import random,sqlite3,uuid,string
 
 class Bot:
 	"create a bot object"
 	def __init__(self,botid=0):
 		if botid==0:
-			c.execute("SELECT word,category FROM knowledge WHERE category='personality'")
-			ps=c.fetchall()
-			personalities=[]
-			for p in ps:
-				personalities.append(p[0])
-			self.personality=random.choice(personalities)
+			c.execute("SELECT index,word,category,type FROM knowledge WHERE category='personality'")
+			personalities=c.fetchall()
+			ps=random.choice(personalities)
+			self.personality=ps[1]
+			self.pid=ps[0]
+			self.formality=ps[3]
 			self.name="bot"
 			self.catchphrase="what's new?"
 			self.quirk="chirp"
@@ -19,8 +19,9 @@ class Bot:
 			if ans.lower=="y":
 				c.execute("INSERT INTO bot_info (name,personality,catchphrase,quirk,temp_key) VALUES (?,?,?,?,?)",(self.name,self.personality,self.catchphrase,self.quirk,tempkey))
 				con.commit()
-				c.execute("SELECT id FROM bot_info WHERE temp_key=(?)",(tempkey,))
+				c.execute("SELECT id,mood FROM bot_info WHERE temp_key=(?)",(tempkey,))
 				self.botid=c.fetchall()[0][0]
+				self.mood=c.fetchall()[0][1]
 				print("ok! my id is {}, so use this to create me next time!".format(self.botid))
 			else:
 				print("ok, when this program ends, my personality will be gone.")
@@ -28,25 +29,49 @@ class Bot:
 			c.execute("SELECT * FROM bot_info WHERE id=(?)",(botid,))
 			info=c.fetchall()[0]
 			self.name=info[1]
-			self.personality=info[2]
+			self.pid=info[2]
 			self.catchphrase=info[3]
 			self.quirk=info[4]
+			self.likes=info[6]
+			self.dislikes=info[7]
+			self.mood=info[8]
 			self.botid=botid
 			
-		print(self.greet())
+			c.execute("SELECT word,type FROM knowledge WHERE id=(?)",(self.pid,))
+			p=c.fetchall()[0]
+			self.personality=p[0]
+			self.formality=p[1]
+			
 
-	def greet(self):
-		c.execute("SELECT word FROM knowledge WHERE type=(?) AND category='greeting'",(self.personality,))
-		greetings=c.fetchall()
-		g=random.choice(greetings)[0]
-		quirk_chance=random.randint(0,1)
-		if quirk_chance==0:
-			greeting=g
-		else:
-			greeting="{}, {}".format(g,self.quirk)
-		if self.personality=="CUTE":
-			greeting=greeting+"!!"
-		return greeting
+	def greet(self,mode=0):
+		if mode==0:
+			c.execute("SELECT word FROM knowledge WHERE type=(?) AND category='greeting'",(self.personality,))
+			greetings=c.fetchall()
+			g=random.choice(greetings)[0]
+			quirk_chance=random.randint(0,1)
+			if quirk_chance==0:
+				greeting=g
+			else:
+				greeting="{}, {}".format(g,self.quirk)
+			if self.personality=="CUTE":
+				greeting=greeting+"!!"
+			return greeting
+			
+		elif mode=="response":
+			form=self.formality
+			forms=["RELAXED","FORMAL"]
+			if form=="random":
+				form=random.choice(forms)
+			
+			if form=="FORMAL":
+				personal="i am"
+			else:
+				personal="i'm"
+				
+			response="{} {}".format(personal,self.mood)
+				
+			return response
+			
 
 	def ask(self):
 		c.execute("SELECT word FROM knowledge WHERE type=(?) AND category='question'",(self.personality,))
@@ -58,6 +83,34 @@ class Bot:
 		else:
 			question="{} {}".format(self.catchphrase,q)
 		return question
+		
+	def reply(self,message):
+		raw=message # keeps the message in its original form if needed later
+		
+		for char in string.punctuation:
+			raw=raw.replace(char,"") # remove all non letter/number characters
+		words=raw.split(" ") # separate words into an array
+		
+		# check for greetings
+		c.execute("SELECT word FROM reply WHERE type='greeting'")
+		greetings=[item[0] for item in c.fetchall()]
+		for word in words:
+			if word in greetings:
+				return self.greet()
+		
+		# check for question greetings (how are you, whats up, etc.)
+		c.execute("SELECT word FROM reply WHERE type='greetQ'")
+		gq=[item[0] for item in c.fetchall()]
+		greetQ=[x.split(",") for x in gq]
+		for g in greetQ:
+			if g==words:
+				return self.greet(mode="response")
+				
+		return words
+		
+	def learn(self,**kwargs):
+		word=kwargs["word"]
+		wordType=kwargs["wordType"]
 
 	def speak(self,length=random.choice(["short"]),subject=random.choice(["animal","place","food"])):
 		c.execute("SELECT id,word,vc FROM knowledge WHERE category='article'")
