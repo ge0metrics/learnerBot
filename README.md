@@ -9,7 +9,7 @@
 - chatbot_gui.py is an example of how the bot could be used in chat format with a GUI
 
 # current methods
-- `myBot=Bot() or myBot=Bot(id=4)` initialize the bot
+- `myBot=Bot()` or `myBot=Bot(id=4)` initialize the bot
 - `myBot.speak()` get the bot to say something
   - `length="short"` or `length="medium"` random length if not supplied
 - `myBot.ask()` get the bot to ask something
