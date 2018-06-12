@@ -7,6 +7,7 @@
 - the chatbot folder is where the bot class file (chatbot.py) and database (knowledge.db) is stored
 - chatbot can be imported to python files as normal (`from chatbot.chatbot import Bot`)
 - chatbot_gui.py is an example of how the bot could be used in chat format with a GUI
+- see https://github.com/ge0metrics/learnerBot/projects/2 for updates and progress tracking
 
 # current methods
 - `myBot=Bot()` or `myBot=Bot(id=4)` initialize the bot
