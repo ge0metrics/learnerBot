@@ -36,12 +36,12 @@ class Bot:
 			self.dislikes=info[7]
 			self.mood=info[8]
 			self.botid=botid
-			
+
 			c.execute("SELECT word,type FROM knowledge WHERE id=(?)",(self.pid,))
 			p=c.fetchall()[0]
 			self.personality=p[0]
 			self.formality=p[1]
-			
+
 
 	def greet(self,mode=0):
 		if mode==0:
@@ -56,22 +56,22 @@ class Bot:
 			if self.personality=="CUTE":
 				greeting=greeting+"!!"
 			return greeting
-			
+
 		elif mode=="response":
 			form=self.formality
 			forms=["RELAXED","FORMAL"]
 			if form=="random":
 				form=random.choice(forms)
-			
+
 			if form=="FORMAL":
 				personal="i am"
 			else:
 				personal="i'm"
-				
+
 			response="{} {}".format(personal,self.mood)
-				
+
 			return response
-			
+
 
 	def ask(self):
 		c.execute("SELECT word FROM knowledge WHERE type=(?) AND category='question'",(self.personality,))
@@ -83,21 +83,21 @@ class Bot:
 		else:
 			question="{} {}".format(self.catchphrase,q)
 		return question
-		
+
 	def reply(self,message):
 		raw=message # keeps the message in its original form if needed later
-		
+
 		for char in string.punctuation:
 			raw=raw.replace(char,"") # remove all non letter/number characters
 		words=raw.split(" ") # separate words into an array
-		
+
 		# check for greetings
 		c.execute("SELECT word FROM reply WHERE type='greeting'")
 		greetings=[item[0] for item in c.fetchall()]
 		for word in words:
 			if word in greetings:
 				return self.greet()
-		
+
 		# check for question greetings (how are you, whats up, etc.)
 		c.execute("SELECT word FROM reply WHERE type='greetQ'")
 		gq=[item[0] for item in c.fetchall()]
@@ -105,9 +105,9 @@ class Bot:
 		for g in greetQ:
 			if g==words:
 				return self.greet(mode="response")
-				
+
 		return words
-		
+
 	def learn(self,**kwargs):
 		word=kwargs["word"]
 		wordType=kwargs["wordType"]
@@ -132,7 +132,7 @@ class Bot:
 			they are things like "the dog is walking" or "she is eating"
 			they dont go into any detail
 			'''
-			
+
 			### selecting article ###
 			a=random.choice(articles)[0]
 
@@ -187,23 +187,23 @@ class Bot:
 
 			### construct sentence ###
 			sentence="{} {} {}{}".format(a,n,vt,v)
-			
+
 		elif length=="medium":
 			'''
 			medium sentences use two articles and two nouns
 			e.g. my cat is walking with his dog
 			'''
-			
+
 			### selecting first article ###
 			a1=random.choice(articles)[0]
-			
+
 			### selecting first noun ###
 			possibleNouns=[]
 			for noun in nouns:
 				if subject.upper() in noun[2].split(","):
 					possibleNouns.append(noun[0])
 			n1=random.choice(possibleNouns)
-			
+
 			### selecting verb ###
 			c.execute("SELECT type FROM knowledge WHERE id=(?)",(n1,))
 			nTs=c.fetchall()[0][0].split(",")
@@ -213,7 +213,7 @@ class Bot:
 					if nT in verb[2]:
 						possibleVerbs.append(verb[0])
 			v=random.choice(possibleVerbs)
-			
+
 			### setting tense ###
 			c.execute("SELECT tense FROM knowledge WHERE id=(?)",(v,))
 			tense=c.fetchall()[0][0]
@@ -227,7 +227,7 @@ class Bot:
 				vt="had been "
 			elif tense=="present":
 				vt=""
-				
+
 			### setting first a/an if chosen ###
 			c.execute("SELECT vc FROM knowledge WHERE id=(?)",(n1,))
 			nVc=c.fetchall()[0][0]
@@ -239,7 +239,7 @@ class Bot:
 			else:
 				c.execute("SELECT word FROM knowledge WHERE id=(?)",(a1,))
 				a1=c.fetchall()[0][0]
-				
+
 			''' ### picking conjunction ###
 			possible_conjunctions={}
 			for conj in conjunctions:
@@ -256,17 +256,17 @@ class Bot:
 					conjs_n=verb[5].split(",")
 					cj=random.choice(conjs)
 					cj_n=conjs_n[conjs.index(cj)]
-				
+
 			### selecting second noun ###
 			possibleNouns=[]
 			for noun in nouns:
 				if cj_n in noun[2].split(","):
 					possibleNouns.append(noun[0])
 			n2=random.choice(possibleNouns)
-				
+
 			### selecting second article ###
 			a2=random.choice(articles)[0]
-				
+
 			### settings second a/an if chosen ###
 			c.execute("SELECT vc FROM knowledge WHERE id=(?)",(n2,))
 			nVc=c.fetchall()[0][0]
@@ -278,7 +278,7 @@ class Bot:
 			else:
 				c.execute("SELECT word FROM knowledge WHERE id=(?)",(a2,))
 				a2=c.fetchall()[0][0]
-				
+
 			### setting all other variables from ids ###
 			c.execute("SELECT word FROM knowledge WHERE id=(?)",(n1,))
 			n1=c.fetchall()[0][0]
@@ -286,11 +286,11 @@ class Bot:
 			n2=c.fetchall()[0][0]
 			c.execute("SELECT word FROM knowledge WHERE id=(?)",(v,))
 			v=c.fetchall()[0][0]
-			
+
 			sentence="{} {} {}{} {} {} {}".format(a1,n1,vt,v,cj,a2,n2)
 
 		return sentence
 
 
-con=sqlite3.connect("knowledge.db")
+con=sqlite3.connect("./chatbot/knowledge.db")
 c=con.cursor()

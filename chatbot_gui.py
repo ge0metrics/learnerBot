@@ -1,4 +1,4 @@
-from brains import Bot
+from chatbot.chatbot import Bot
 from tkinter import *
 from tkinter import scrolledtext as tkst
 
