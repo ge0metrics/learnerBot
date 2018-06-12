@@ -2,8 +2,9 @@ import random,sqlite3,uuid,string
 
 class Bot:
 	"create a bot object"
-	def __init__(self,botid=0):
-		if botid==0: # if no bot id supplied, we generate a new bot
+	def __init__(self,botid=None,debug=False):
+		self.debug=debug # if True then replies will be raw repetitions of the message fed to it
+		if botid==None: # if no bot id supplied, we generate a new bot
 
 			### LIKES/DISLIKES ###
 			c.execute("SELECT word FROM knowledge WHERE category='noun' AND type='object'") # fetch objects
@@ -171,7 +172,10 @@ class Bot:
 			if g==words:
 				return self.greet(mode="response")
 
-		return words
+		if self.debug==True:
+			return words
+		else:
+			return self.speak()
 
 	def learn(self,**kwargs):
 		word=kwargs["word"]

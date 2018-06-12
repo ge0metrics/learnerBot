@@ -17,12 +17,12 @@ chat.grid(row=0,column=0,columnspan=2)
 
 entry=Entry(root) # user types message here
 entry.grid(row=1,column=0,sticky="nesw")
-entry.bind("<Return>",lambda e:send(entry.get(),"User",e)) # send message on return key press
+entry.bind("<Return>",lambda e:send(entry.get(),"User",e)) # user can send message on return key press
 
-submit=Button(root,text="Enter",command=lambda:send(entry.get(),bot.name,0))
+submit=Button(root,text="Enter",command=lambda:send(entry.get(),bot.name,0)) # or click submit button to send message
 submit.grid(row=1,column=1,sticky="nesw")
 
-bot=Bot(botid=4) # initialize bot
+bot=Bot(botid=4,debug=True) # initialize bot
 send(bot.greet(),bot.name,0) # get the bot to greet the user
 
 root.mainloop()
