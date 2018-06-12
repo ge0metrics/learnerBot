@@ -6,6 +6,7 @@ def send(message,name,e):
 	chat.configure(state="normal") # allow message to be entered into chat widget
 	chat.insert(END,"<{}> {}\n".format(name,message)) # insert message into chat widget
 	chat.configure(state="disabled") # prevent text from being modified by the user
+	chat.see("end") # auto scroll chat window to bottom
 	if name=="User":
 		entry.delete(0,END) # clear message entry widget
 		send(bot.reply(message),bot.name,0) # bot speaks in relation to user's message
