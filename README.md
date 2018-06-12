@@ -10,7 +10,8 @@
 - see https://github.com/ge0metrics/learnerBot/projects/2 for updates and progress tracking
 
 # current methods
-- `myBot=Bot()` or `myBot=Bot(id=4)` initialize the bot
+- `myBot=Bot()` initialize the bot
+  - `id=4` initialize a bot with an id
 - `myBot.speak()` get the bot to say something
   - `length="short"` or `length="medium"` random length if not supplied
 - `myBot.ask()` get the bot to ask something
