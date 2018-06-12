@@ -25,10 +25,10 @@
 # current methods
 - myBot=Bot() or myBot=Bot(id=4) | initialize the bot
 - myBot.speak() | get the bot to say something
-- - length="short" or length="medium" or blank for random
+  - length="short" or length="medium" or blank for random
 - myBot.ask() | get the bot to ask something
 - myBot.greet() | get the bot to greet you
-- - mode="respond" for answer to "what's up" style questions
+  - mode="respond" for answer to "what's up" style questions
 
 # future updates
 - emotions affecting speech
