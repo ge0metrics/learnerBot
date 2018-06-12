@@ -23,7 +23,7 @@ entry.bind("<Return>",lambda e:send(entry.get(),"User",e)) # user can send messa
 submit=Button(root,text="Enter",command=lambda:send(entry.get(),bot.name,0)) # or click submit button to send message
 submit.grid(row=1,column=1,sticky="nesw")
 
-bot=Bot(botid=4,debug=True) # initialize bot
+bot=Bot(botid=4,debug=False) # initialize bot
 send(bot.greet(),bot.name,0) # get the bot to greet the user
 
 root.mainloop()

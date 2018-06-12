@@ -177,11 +177,29 @@ class Bot:
 		else:
 			return self.speak()
 
-	def learn(self,**kwargs):
-		word=kwargs["word"]
-		wordType=kwargs["wordType"]
+	def learn(self):
+		pass
 
-	def speak(self,length=random.choice(["short"]),subject=random.choice(["animal","place","food"])):
+	def speak(self,**kwargs):
+		try:
+			length=kwargs["length"] # if the user defined the length set it here
+		except KeyError:
+			length=random.choice(["short","medium"]) # if they didnt pick a random length
+
+		try:
+			subject=kwargs["subject"] # if the user defined a subject set it here
+		except KeyError:
+			c.execute("SELECT type FROM knowledge WHERE category='noun'") # if they didnt get subjects
+			sjs=c.fetchall()
+			subjects=[]
+			for sj in sjs:
+				sj=sj[0].split(",")
+				for s in sj:
+					if s not in subjects:
+						subjects.append(s)
+			subject=random.choice(subjects) # pick a random subject from all the subjects found in knowledge
+		print(subject)
+
 		c.execute("SELECT id,word,vc FROM knowledge WHERE category='article'")
 		articles=c.fetchall()
 		c.execute("SELECT id,word,type,vc,adj_type FROM knowledge WHERE category='noun'")
