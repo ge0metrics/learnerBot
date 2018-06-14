@@ -163,31 +163,31 @@ class Bot:
 		for row in c.fetchall():
 			phrases.update({row[0]:row[1]}) # store phrases in a dictionary
 
-		command=None
-		for phrase in phrases:
-			p=phrase
-			phrase=phrase.split(",")
-			if phrase[0] in words:
-				index=words.index(phrase[0])
-				if len(phrase)==1:
-					command=phrases[p]
-				else:
-					sequence=[]
-					for word in phrase:
-						if index<len(words):
-							if words[index]==word:
-								sequence.append(True)
-							else:
-								sequence=[]
-						else:
-							sequence=[]
-						index+=1
-					if len(sequence)==len(phrase):
-						command=phrases[p]
-			if phrases[p]=="laugh":
-				for word in words:
-					if phrase[0] in word:
-						command=phrases[p]
+		command=None # if nothing is found in the user message, we need the variable to exist
+		for phrase in phrases: # check each phrase in database
+			p=phrase # store unsplit phrase as p
+			phrase=phrase.split(",") # split phrase into a list
+			if phrase[0] in words: # if the first word of the phrase is in the user's message
+				index=words.index(phrase[0]) # set index to where the phrase begins in the user's message
+				if len(phrase)==1: # if the phrase is only a single word, bingo
+					command=phrases[p] # the command variable becomes the type of phrase said
+				else: # the phrase is more than one word, so we have to check consecutive words
+					sequence=[] # sequence list init
+					for word in phrase: # for each word in the phrase
+						if index<len(words): # make sure we dont hit the end of the user's message and cause an error
+							if words[index]==word: # check consecutive words in the user's message for the words in the phrase
+								sequence.append(True) # append True to the sequence list
+							else: # the word in the user's message is not a word in the phrase
+								sequence=[] # we reset the array because the words might be out of order
+						else: # we hit the end of the user's message without matching every word in the phrase
+							sequence=[] # reset the sequence array
+						index+=1 # add one to the index, and continue to the next word in the phrase
+					if len(sequence)==len(phrase): # if the sequence array is the same length as the phrase, we found all the words in the phrase next to each other
+						command=phrases[p] # set the command to the type of phrase it is
+			if phrases[p]=="laugh": # we deal with "hahaha" and "hehehe" differently
+				for word in words: # check every word in the user's message
+					if phrase[0] in word: # we check if any number of "haha" or "hehe" etc is in that one word
+						command=phrases[p] # and set the command to laugh
 
 		# decide how to reply
 		if command=="greeting":
