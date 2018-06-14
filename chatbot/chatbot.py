@@ -151,36 +151,73 @@ class Bot:
 		return question
 
 	def reply(self,message):
+
 		raw=message # keeps the message in its original form if needed later
 
 		for char in string.punctuation:
 			raw=raw.replace(char,"") # remove all non letter/number characters
 		words=raw.split(" ") # separate words into an array
 
-		# check for greetings
-		c.execute("SELECT word FROM reply WHERE type='greeting'")
-		greetings=[item[0] for item in c.fetchall()]
-		for word in words:
-			if word in greetings:
-				return self.greet()
+		phrases={}
+		c.execute("SELECT word,type FROM reply") # get all phrases
+		for row in c.fetchall():
+			phrases.update({row[0]:row[1]}) # store phrases in a dictionary
 
-		# check for question greetings (how are you, whats up, etc.)
-		c.execute("SELECT word FROM reply WHERE type='greetQ'")
-		gq=[item[0] for item in c.fetchall()]
-		greetQ=[x.split(",") for x in gq]
-		for g in greetQ:
-			if g==words:
-				return self.greet(mode="response")
+		command=None
+		for phrase in phrases:
+			p=phrase
+			phrase=phrase.split(",")
+			if phrase[0] in words:
+				index=words.index(phrase[0])
+				if len(phrase)==1:
+					command=phrases[p]
+				else:
+					sequence=[]
+					for word in phrase:
+						if index<len(words):
+							if words[index]==word:
+								sequence.append(True)
+							else:
+								sequence=[]
+						else:
+							sequence=[]
+						index+=1
+					if len(sequence)==len(phrase):
+						command=phrases[p]
+			if phrases[p]=="laugh":
+				for word in words:
+					if phrase[0] in word:
+						command=phrases[p]
 
-		if self.debug==True:
-			return words
+		# decide how to reply
+		if command=="greeting":
+			return self.greet()
+		elif command=="greetQ":
+			return self.greet("response")
+		elif command=="laugh":
+			return self.laugh()
+
+		if self.debug==True: # if debug mode is on
+			return words # say raw user input
 		else:
-			return self.speak()
+			return self.speak() # if not, say something random
+
+	def laugh(self):
+		if self.personality=="CUTE":
+			return "hehe"
+		elif self.personality=="COOL":
+			return "ha"
+		elif self.personality=="INTROVERTED":
+			return "*giggles*"
+		elif self.personality=="NORMAL":
+			return "haha"
+		elif self.personality=="EXOTIC":
+			return "haw haw haw."
 
 	def learn(self):
 		pass
 
-	def speak(self,**kwargs):
+	def speak(self,mode=None,**kwargs):
 		try:
 			length=kwargs["length"] # if the user defined the length set it here
 		except KeyError:
@@ -198,7 +235,6 @@ class Bot:
 					if s not in subjects:
 						subjects.append(s)
 			subject=random.choice(subjects) # pick a random subject from all the subjects found in knowledge
-		print(subject)
 
 		c.execute("SELECT id,word,vc FROM knowledge WHERE category='article'")
 		articles=c.fetchall()
@@ -213,12 +249,13 @@ class Bot:
 		c.execute("SELECT id,word,type FROM knowledge WHERE category='conjunction'")
 		conjunctions=c.fetchall()
 
+		if mode=="myself":
+			return "hewwo"
+
 		if length=="short":
-			'''
-			short sentences are simple, using no adjectives or adverbs
-			they are things like "the dog is walking" or "she is eating"
-			they dont go into any detail
-			'''
+			#short sentences are simple, using no adjectives or adverbs
+			#they are things like "the dog is walking" or "she is eating"
+			#they dont go into any detail
 
 			### selecting article ###
 			a=random.choice(articles)[0]
